@@ -7,6 +7,9 @@ pygame.init()
 
 WIN = pygame.display.set_mode((config.WIDTH,config.HEIGHT))
 
+P1_SCORE = pygame.USEREVENT + 1
+P2_SCORE = pygame.USEREVENT + 2
+
 def draw_screen(p1,p2,ball):
     WIN.fill(colors.BLACK)
 
@@ -16,15 +19,29 @@ def draw_screen(p1,p2,ball):
 
     pygame.display.update()
 
-def ball_movement(ball, p1, p2, firsttime):
+def ball_movement(ball, p1, p2, firsttime,moveright):
     if firsttime:
         randnum = randint(0,1)
         if randnum == 1:
             randbool = True
         else:
             randbool = False
-
-    if collide_rect
+        
+        moveright = randbool
+    
+    if ball.x + ball.width >= p2.x and pygame.Rect.colliderect(ball):
+        moveright = not(moveright)
+    if ball.x <= p1.x and pygame.Rect.colliderect(ball):
+        moveright = not(moveright)
+    if ball.x + ball.width >= config.WIDTH:
+        pygame.event.post(pygame.event.Event(P1_SCORE))
+    if ball.x <= 0:
+        pygame.event.post(pygame.event.Event(P2_SCORE))
+    
+    if moveright:
+        ball.x += config.BALL_VEL
+    if moveright == False:
+        ball.x -= config.BALL_VEL
 
 def p1_movement(keys_pressed, p1):
     if keys_pressed[pygame.K_w] and p1.y - config.PLAYER_VEL >= 0:
@@ -46,17 +63,27 @@ def main():
     clock = pygame.time.Clock()
     run = True
     firsttime = True
+    moveright = True
+
+    p1_score = 0
+    p2_score = 0
+
     while run:
         clock.tick(config.FPS)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
+            if event.type == P1_SCORE:
+                p1_score += 1
+            if event.type == P2_SCORE:
+                p2_score += 1
         
         keys_pressed = pygame.key.get_pressed()
         p1_movement(keys_pressed, p1)
         p2_movement(keys_pressed, p2)
+        ball_movement(ball, p1, p2, firsttime,moveright)
         draw_screen(p1,p2,ball)
-        
+
         firsttime = False
 
     pygame.quit()
