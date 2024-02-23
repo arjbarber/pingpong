@@ -11,6 +11,7 @@ def draw_screen(p1,p2):
 
     pygame.draw.rect(WIN, colors.RED, p1)
     pygame.draw.rect(WIN, colors.RED, p2)
+    pygame.draw.circle(WIN, colors.WHITE,(config.WIDTH/2,config.HEIGHT/2),5,width=0)
     pygame.display.update()
 
 def p1_movement(keys_pressed, p1):
