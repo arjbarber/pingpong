@@ -1,2 +1,2 @@
-# pygametutorial
+# PingPong
 pygame tutorial
