@@ -8,6 +8,7 @@ pygame.init()
 WIN = pygame.display.set_mode((config.WIDTH,config.HEIGHT))
 
 SCORE_FONT = pygame.font.SysFont(config.SCORE_FONT_NAME, config.SCORE_FONT_SIZE)
+WINNER_FONT = pygame.font.SysFont()
 
 P1_SCORE = pygame.USEREVENT + 1
 P2_SCORE = pygame.USEREVENT + 2
@@ -58,16 +59,16 @@ class Ball:
         ball.firsttime = True
 
 def draw_screen(p1,p2,ball,p1_score,p2_score):
-    WIN.fill(colors.BLACK)
+    WIN.fill(config.COLOR)
 
     p1_score_text = SCORE_FONT.render("Score: " + str(p1_score), 1, config.SCORE_FONT_COLOR)
     p2_score_text = SCORE_FONT.render("Score: " + str(p2_score), 1, config.SCORE_FONT_COLOR)
     WIN.blit(p1_score_text, (config.SCORE_FONT_X_MARGIN, config.SCORE_FONT_Y_MARGIN))
     WIN.blit(p2_score_text, (config.WIDTH - config.SCORE_FONT_X_MARGIN - p2_score_text.get_width() , config.SCORE_FONT_Y_MARGIN))
     
-    pygame.draw.rect(WIN, colors.RED, p1)
-    pygame.draw.rect(WIN, colors.RED, p2)
-    pygame.draw.circle(WIN, colors.WHITE,(ball.rect.x + config.BALL_RADIUS,ball.rect.y + config.BALL_RADIUS),config.BALL_RADIUS,width=0)
+    pygame.draw.rect(WIN, config.PLAYER_COLOR, p1)
+    pygame.draw.rect(WIN, config.PLAYER_COLOR, p2)
+    pygame.draw.circle(WIN, config.BALL_COLOR,(ball.rect.x + config.BALL_RADIUS,ball.rect.y + config.BALL_RADIUS),config.BALL_RADIUS,width=0)
 
     pygame.display.update()
 
