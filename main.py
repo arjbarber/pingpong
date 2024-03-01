@@ -7,6 +7,8 @@ pygame.init()
 
 WIN = pygame.display.set_mode((config.WIDTH,config.HEIGHT))
 
+SCORE_FONT = pygame.font.SysFont(config.SCORE_FONT_NAME, config.SCORE_FONT_SIZE)
+
 P1_SCORE = pygame.USEREVENT + 1
 P2_SCORE = pygame.USEREVENT + 2
 
@@ -53,10 +55,16 @@ class Ball:
         ball.p1.y = config.HEIGHT/2 - config.PLAYER_HEIGHT/2
         ball.p2.x = config.WIDTH - config.PLAYER_MARGIN
         ball.p2.y = config.HEIGHT/2 - config.PLAYER_HEIGHT/2
+        ball.firsttime = True
 
-def draw_screen(p1,p2,ball):
+def draw_screen(p1,p2,ball,p1_score,p2_score):
     WIN.fill(colors.BLACK)
 
+    p1_score_text = SCORE_FONT.render("Score: " + str(p1_score), 1, config.SCORE_FONT_COLOR)
+    p2_score_text = SCORE_FONT.render("Score: " + str(p2_score), 1, config.SCORE_FONT_COLOR)
+    WIN.blit(p1_score_text, (config.SCORE_FONT_X_MARGIN, config.SCORE_FONT_Y_MARGIN))
+    WIN.blit(p2_score_text, (config.WIDTH - config.SCORE_FONT_X_MARGIN - p2_score_text.get_width() , config.SCORE_FONT_Y_MARGIN))
+    
     pygame.draw.rect(WIN, colors.RED, p1)
     pygame.draw.rect(WIN, colors.RED, p2)
     pygame.draw.circle(WIN, colors.WHITE,(ball.rect.x + config.BALL_RADIUS,ball.rect.y + config.BALL_RADIUS),config.BALL_RADIUS,width=0)
@@ -102,7 +110,7 @@ def main():
         p1_movement(keys_pressed, p1)
         p2_movement(keys_pressed, p2)
         ball.movement()
-        draw_screen(p1,p2,ball)
+        draw_screen(p1,p2,ball, p1_score, p2_score)
 
 
     pygame.quit()
