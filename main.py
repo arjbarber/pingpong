@@ -8,13 +8,13 @@ pygame.init()
 WIN = pygame.display.set_mode((config.WIDTH,config.HEIGHT))
 
 SCORE_FONT = pygame.font.SysFont(config.SCORE_FONT_NAME, config.SCORE_FONT_SIZE)
-WINNER_FONT = pygame.font.SysFont()
+#WINNER_FONT = pygame.font.SysFont()
 
 P1_SCORE = pygame.USEREVENT + 1
 P2_SCORE = pygame.USEREVENT + 2
 
 class Ball:
-    def __init__(self, p1, p2, moveright, firstime, angle=0,y_vel=0,x_vel=config.BALL_INIT_VEL):
+    def __init__(self, p1, p2, moveright, firstime, angle=0,y_vel=0,x_vel=config.BALL_X_STRAIGHT_VEL):
         self.p1 = p1
         self.p2 = p2
         self.rect = pygame.Rect(config.WIDTH/2 - config.BALL_RADIUS,config.HEIGHT/2 - config.BALL_RADIUS, config.BALL_RADIUS*2, config.BALL_RADIUS*2)
@@ -27,20 +27,40 @@ class Ball:
     def movement(ball):
         if ball.rect.x + ball.rect.width >= ball.p2.x and ball.rect.colliderect(ball.p2):
             ball.moveright = False
+            if ball.rect.y + config.BALL_RADIUS >= ball.p2.y and ball.rect.y + config.BALL_RADIUS <= ball.p2.y + (ball.p2.height//3):
+                ball.y_vel = config.BALL_Y_VEL * -1
+                ball.x_vel = config.BALL_X_SLANT_VEL
+            elif ball.rect.y + config.BALL_RADIUS > ball.p2.y + (ball.p2.height//3) and  ball.rect.y + config.BALL_RADIUS < ball.p2.y + (2*(ball.p2.height//3)):
+                ball.y_vel = 0
+                ball.x_vel = config.BALL_X_STRAIGHT_VEL
+            elif ball.rect.y + config.BALL_RADIUS >= ball.p2.y + (2*(ball.p2.height//3)) and  ball.rect.y + config.BALL_RADIUS <= ball.p2.y + ball.p2.height:
+                ball.y_vel = config.BALL_Y_VEL * -1
+                ball.x_vel = config.BALL_X_SLANT_VEL
+
+            if ball.moveright == False:
+                ball.x_vel *= -1
+
         elif ball.rect.x <= ball.p1.x and ball.rect.colliderect(ball.p1):
             ball.moveright = True
             if ball.rect.y + config.BALL_RADIUS >= ball.p1.y and ball.rect.y + config.BALL_RADIUS <= ball.p1.y + (ball.p1.height//3):
-                y_vel = -5
-            if ball.rect.y + config.BALL_RADIUS > ball.p1.y + (ball.p1.height//3) and ball.rect.y < ball.p1.y + (ball.p1.height//3):
-                y_vel = -5
+                ball.y_vel = config.BALL_Y_VEL * -1
+                ball.x_vel = config.BALL_X_SLANT_VEL
+            elif ball.rect.y + config.BALL_RADIUS > ball.p1.y + (ball.p1.height//3) and  ball.rect.y + config.BALL_RADIUS < ball.p1.y + (2*(ball.p1.height//3)):
+                ball.y_vel = 0
+                ball.x_vel = config.BALL_X_STRAIGHT_VEL
+            elif ball.rect.y + config.BALL_RADIUS >= ball.p1.y + (2*(ball.p1.height//3)) and  ball.rect.y + config.BALL_RADIUS <= ball.p1.y + ball.p1.height:
+                ball.y_vel = config.BALL_Y_VEL * -1
+                ball.x_vel = config.BALL_X_SLANT_VEL
+
+            if ball.moveright == False:
+                ball.x_vel *= -1
+            
 
         if ball.rect.x + ball.rect.width >= config.WIDTH:
             pygame.event.post(pygame.event.Event(P1_SCORE))
         elif ball.rect.x <= 0:
             pygame.event.post(pygame.event.Event(P2_SCORE))
 
-        #print(firsttime)
-        #"""
         if ball.firsttime:
             randnum = randint(0,1)
             if randnum == 1:
@@ -50,14 +70,12 @@ class Ball:
             ball.moveright = randbool
 
             ball.firsttime = False
-        #"""
-        
-        if ball.moveright:
-            x_vel = x_vel
-        if ball.moveright == False:
-            x_vel = x_vel * -1
 
-        ball.rect.x += x_vel
+        if ball.rect.y + ball.rect.height >= config.WIDTH or ball.rect.y <= 0:
+            ball.y_vel *= -1
+
+        ball.rect.x += ball.x_vel
+        ball.rect.y += ball.y_vel
     
     def reset(ball):
         ball.rect.x = config.WIDTH/2 - config.BALL_RADIUS
