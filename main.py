@@ -8,7 +8,7 @@ pygame.init()
 WIN = pygame.display.set_mode((config.WIDTH,config.HEIGHT))
 
 SCORE_FONT = pygame.font.SysFont(config.SCORE_FONT_NAME, config.SCORE_FONT_SIZE)
-#WINNER_FONT = pygame.font.SysFont()
+WINNER_FONT = pygame.font.SysFont(config.WINNER_FONT_NAME, config.WINNER_FONT_SIZE)
 
 P1_SCORE = pygame.USEREVENT + 1
 P2_SCORE = pygame.USEREVENT + 2
@@ -34,7 +34,7 @@ class Ball:
                 ball.y_vel = 0
                 ball.x_vel = config.BALL_X_STRAIGHT_VEL
             elif ball.rect.y + config.BALL_RADIUS >= ball.p2.y + (2*(ball.p2.height//3)) and  ball.rect.y + config.BALL_RADIUS <= ball.p2.y + ball.p2.height:
-                ball.y_vel = config.BALL_Y_VEL * -1
+                ball.y_vel = config.BALL_Y_VEL
                 ball.x_vel = config.BALL_X_SLANT_VEL
 
             if ball.moveright == False:
@@ -49,7 +49,7 @@ class Ball:
                 ball.y_vel = 0
                 ball.x_vel = config.BALL_X_STRAIGHT_VEL
             elif ball.rect.y + config.BALL_RADIUS >= ball.p1.y + (2*(ball.p1.height//3)) and  ball.rect.y + config.BALL_RADIUS <= ball.p1.y + ball.p1.height:
-                ball.y_vel = config.BALL_Y_VEL * -1
+                ball.y_vel = config.BALL_Y_VEL
                 ball.x_vel = config.BALL_X_SLANT_VEL
 
             if ball.moveright == False:
@@ -122,6 +122,7 @@ def main():
 
     p1_score = 0
     p2_score = 0
+    win_text = ""
 
     while run:
         clock.tick(config.FPS)
@@ -135,6 +136,11 @@ def main():
                 p2_score += 1
                 ball.reset()
         
+        if p1_score == 7:
+            win_text = "P1 Wins!"
+        if p2_score == 7:
+            win_text = "P2 Wins!"
+
         keys_pressed = pygame.key.get_pressed()
         p1_movement(keys_pressed, p1)
         p2_movement(keys_pressed, p2)
