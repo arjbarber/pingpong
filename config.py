@@ -15,7 +15,7 @@ PLAYER_COLOR = colors.RED
 
 # Ball Settings
 BALL_RADIUS = 5
-BALL_VEL = 5
+BALL_INIT_VEL = 5
 BALL_COLOR = colors.WHITE
 
 # Score Font Settings

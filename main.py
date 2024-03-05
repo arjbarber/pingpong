@@ -1,7 +1,7 @@
 import pygame
 import sys
 import config
-import colors
+from math import fabs, floor
 from random import randint
 pygame.init()
 
@@ -14,18 +14,26 @@ P1_SCORE = pygame.USEREVENT + 1
 P2_SCORE = pygame.USEREVENT + 2
 
 class Ball:
-    def __init__(self, p1, p2, moveright, firstime):
+    def __init__(self, p1, p2, moveright, firstime, angle=0,y_vel=0,x_vel=config.BALL_INIT_VEL):
         self.p1 = p1
         self.p2 = p2
         self.rect = pygame.Rect(config.WIDTH/2 - config.BALL_RADIUS,config.HEIGHT/2 - config.BALL_RADIUS, config.BALL_RADIUS*2, config.BALL_RADIUS*2)
         self.moveright = moveright
         self.firsttime = firstime
+        self.angle = angle
+        self.y_vel = y_vel
+        self.x_vel = x_vel
 
     def movement(ball):
         if ball.rect.x + ball.rect.width >= ball.p2.x and ball.rect.colliderect(ball.p2):
             ball.moveright = False
         elif ball.rect.x <= ball.p1.x and ball.rect.colliderect(ball.p1):
             ball.moveright = True
+            if ball.rect.y + config.BALL_RADIUS >= ball.p1.y and ball.rect.y + config.BALL_RADIUS <= ball.p1.y + (ball.p1.height//3):
+                y_vel = -5
+            if ball.rect.y + config.BALL_RADIUS > ball.p1.y + (ball.p1.height//3) and ball.rect.y < ball.p1.y + (ball.p1.height//3):
+                y_vel = -5
+
         if ball.rect.x + ball.rect.width >= config.WIDTH:
             pygame.event.post(pygame.event.Event(P1_SCORE))
         elif ball.rect.x <= 0:
@@ -45,9 +53,11 @@ class Ball:
         #"""
         
         if ball.moveright:
-            ball.rect.x += config.BALL_VEL
+            x_vel = x_vel
         if ball.moveright == False:
-            ball.rect.x -= config.BALL_VEL
+            x_vel = x_vel * -1
+
+        ball.rect.x += x_vel
     
     def reset(ball):
         ball.rect.x = config.WIDTH/2 - config.BALL_RADIUS
@@ -88,7 +98,7 @@ def main():
     p1 = pygame.Rect(config.PLAYER_MARGIN, config.HEIGHT/2 - config.PLAYER_HEIGHT/2, config.PLAYER_WIDTH, config.PLAYER_HEIGHT)
     p2 = pygame.Rect(config.WIDTH - config.PLAYER_MARGIN, config.HEIGHT/2 - config.PLAYER_HEIGHT/2, config.PLAYER_WIDTH, config.PLAYER_HEIGHT)
     ball = Ball(p1,p2,True,True)
-
+    
     clock = pygame.time.Clock()
     run = True
 
