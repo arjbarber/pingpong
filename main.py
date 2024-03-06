@@ -1,8 +1,8 @@
 import pygame
 import sys
 import config
-from math import fabs, floor
 from random import randint
+from time import time
 pygame.init()
 
 WIN = pygame.display.set_mode((config.WIDTH,config.HEIGHT))
@@ -40,7 +40,7 @@ class Ball:
             if ball.moveright == False:
                 ball.x_vel *= -1
 
-        elif ball.rect.x <= ball.p1.x and ball.rect.colliderect(ball.p1):
+        elif ball.rect.x <= ball.p1.x + ball.p1.width and ball.rect.colliderect(ball.p1):
             ball.moveright = True
             if ball.rect.y + config.BALL_RADIUS >= ball.p1.y and ball.rect.y + config.BALL_RADIUS <= ball.p1.y + (ball.p1.height//3):
                 ball.y_vel = config.BALL_Y_VEL * -1
@@ -85,6 +85,8 @@ class Ball:
         ball.p2.x = config.WIDTH - config.PLAYER_MARGIN
         ball.p2.y = config.HEIGHT/2 - config.PLAYER_HEIGHT/2
         ball.firsttime = True
+        ball.x_vel = config.BALL_X_STRAIGHT_VEL
+        ball.y_vel = 0
 
 def draw_screen(p1,p2,ball,p1_score,p2_score):
     WIN.fill(config.COLOR)
@@ -100,6 +102,19 @@ def draw_screen(p1,p2,ball,p1_score,p2_score):
 
     pygame.display.update()
 
+def draw_winner(win_text, counter):
+    win_text_render = WINNER_FONT.render(win_text, 1, config.WINNER_FONT_COLOR)
+    WIN.blit(win_text_render, (config.WIDTH/2 - win_text_render.get_width()/2, config.HEIGHT/2 - win_text_render.get_height()/2))
+    
+    if counter == 0:
+        counter = time()
+    elif time >= counter + 5.0:
+        pygame.quit()
+        sys.exit()
+    else:
+        return counter
+    
+
 def p1_movement(keys_pressed, p1):
     if keys_pressed[pygame.K_w] and p1.y - config.PLAYER_VEL >= 0:
         p1.y -= config.PLAYER_VEL
@@ -113,6 +128,7 @@ def p2_movement(keys_pressed, p2):
         p2.y += config.PLAYER_VEL
 
 def main():
+    pygame.display.set_caption("Ping Pong")
     p1 = pygame.Rect(config.PLAYER_MARGIN, config.HEIGHT/2 - config.PLAYER_HEIGHT/2, config.PLAYER_WIDTH, config.PLAYER_HEIGHT)
     p2 = pygame.Rect(config.WIDTH - config.PLAYER_MARGIN, config.HEIGHT/2 - config.PLAYER_HEIGHT/2, config.PLAYER_WIDTH, config.PLAYER_HEIGHT)
     ball = Ball(p1,p2,True,True)
@@ -123,6 +139,8 @@ def main():
     p1_score = 0
     p2_score = 0
     win_text = ""
+    counter = 0
+    isMoving = True
 
     while run:
         clock.tick(config.FPS)
@@ -136,15 +154,20 @@ def main():
                 p2_score += 1
                 ball.reset()
         
-        if p1_score == 7:
+        if p1_score >= 7:
             win_text = "P1 Wins!"
-        if p2_score == 7:
+            counter = draw_winner(win_text,counter)
+            isMoving = False
+        if p2_score >= 7:
             win_text = "P2 Wins!"
+            counter = draw_winner(win_text,counter)
+            isMoving = False
 
-        keys_pressed = pygame.key.get_pressed()
-        p1_movement(keys_pressed, p1)
-        p2_movement(keys_pressed, p2)
-        ball.movement()
+        if isMoving:
+            keys_pressed = pygame.key.get_pressed()
+            p1_movement(keys_pressed, p1)
+            p2_movement(keys_pressed, p2)
+            ball.movement()
         draw_screen(p1,p2,ball, p1_score, p2_score)
 
 
