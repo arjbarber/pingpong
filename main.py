@@ -1,14 +1,34 @@
 import pygame
 import sys
 import config
+import os
+import colors
+from button import Button
 from random import randint
 from time import time
 pygame.init()
 
+
+def get_font(size): # Returns Press-Start-2P in the desired size
+    return pygame.font.Font(os.path.join('Assets','font.ttf'), size)
+
+
 WIN = pygame.display.set_mode((config.WIDTH,config.HEIGHT))
 
-SCORE_FONT = pygame.font.SysFont(config.SCORE_FONT_NAME, config.SCORE_FONT_SIZE)
-WINNER_FONT = pygame.font.SysFont(config.WINNER_FONT_NAME, config.WINNER_FONT_SIZE)
+if config.SCORE_FONT_NAME == 'Press-Start-2P':
+    SCORE_FONT = get_font(config.SCORE_FONT_SIZE)
+else:
+    SCORE_FONT = pygame.font.SysFont(config.SCORE_FONT_NAME, config.SCORE_FONT_SIZE)
+if config.WINNER_FONT_NAME == 'Press-Start-2P':
+    WINNER_FONT = get_font(config.WINNER_FONT_SIZE)
+else:
+    WINNER_FONT = pygame.font.SysFont(config.WINNER_FONT_NAME, config.WINNER_FONT_SIZE)
+
+BACKGROUND_IMAGE = pygame.image.load(
+    os.path.join('Assets','Background.png')
+)
+BACKGROUND = pygame.transform.scale(BACKGROUND_IMAGE,(config.WIDTH,config.HEIGHT))
+
 
 P1_SCORE = pygame.USEREVENT + 1
 P2_SCORE = pygame.USEREVENT + 2
@@ -110,8 +130,7 @@ def draw_winner(win_text, counter):
         counter = time()
         pygame.display.update()
     elif time() >= counter + 5.0:
-        pygame.quit()
-        sys.exit()
+        menu()
     return counter
     
 
@@ -174,5 +193,46 @@ def main():
     pygame.quit()
     sys.exit()
 
+def menu():
+
+    pygame.display.set_caption("Main Menu")
+
+    
+    quit_button_surface = pygame.transform.scale(
+        pygame.image.load(os.path.join('Assets', 'Play Rect.png')), (400,150)
+    )
+    play_button_surface = pygame.transform.scale(
+        pygame.image.load(os.path.join('Assets', 'Play Rect.png')), (quit_button_surface.get_width(),quit_button_surface.get_height())
+    )
+    
+    MENU_TEXT = get_font(config.MENU_FONT_SIZE).render("Ping Pong", True, config.MENU_FONT_COLOR)
+    MENU_RECT = MENU_TEXT.get_rect(center=(config.WIDTH//2,config.HEIGHT//2 - 200))
+    
+    quitButton = Button(quit_button_surface, (config.WIDTH//2), (config.HEIGHT//2) + 150, "Quit",WIN)
+    playButton = Button(play_button_surface, (config.WIDTH//2), (config.HEIGHT//2) - 50, "Play",WIN)
+    
+    clock = pygame.time.Clock()
+    while True:
+        clock.tick(config.FPS)
+        WIN.fill(colors.WHITE)
+        WIN.blit(BACKGROUND, (0,0))
+        WIN.blit(MENU_TEXT, MENU_RECT)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if playButton.checkForInput(pygame.mouse.get_pos()):
+                    main()
+                if quitButton.checkForInput(pygame.mouse.get_pos()):
+                    pygame.quit()
+                    sys.exit()
+        
+        playButton.update()
+        playButton.changeColor(pygame.mouse.get_pos())
+        quitButton.update()
+        quitButton.changeColor(pygame.mouse.get_pos())
+        pygame.display.update()
+
 if __name__ == "__main__":
-    main()
+    menu()
