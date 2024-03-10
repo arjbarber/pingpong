@@ -1,38 +1,66 @@
 import pygame
 import sys
 import config
-import colors
 from random import randint
+from time import time
 pygame.init()
 
 WIN = pygame.display.set_mode((config.WIDTH,config.HEIGHT))
 
 SCORE_FONT = pygame.font.SysFont(config.SCORE_FONT_NAME, config.SCORE_FONT_SIZE)
-WINNER_FONT = pygame.font.SysFont()
+WINNER_FONT = pygame.font.SysFont(config.WINNER_FONT_NAME, config.WINNER_FONT_SIZE)
 
 P1_SCORE = pygame.USEREVENT + 1
 P2_SCORE = pygame.USEREVENT + 2
 
 class Ball:
-    def __init__(self, p1, p2, moveright, firstime):
+    def __init__(self, p1, p2, moveright, firstime, angle=0,y_vel=0,x_vel=config.BALL_X_STRAIGHT_VEL):
         self.p1 = p1
         self.p2 = p2
         self.rect = pygame.Rect(config.WIDTH/2 - config.BALL_RADIUS,config.HEIGHT/2 - config.BALL_RADIUS, config.BALL_RADIUS*2, config.BALL_RADIUS*2)
         self.moveright = moveright
         self.firsttime = firstime
+        self.angle = angle
+        self.y_vel = y_vel
+        self.x_vel = x_vel
 
     def movement(ball):
         if ball.rect.x + ball.rect.width >= ball.p2.x and ball.rect.colliderect(ball.p2):
             ball.moveright = False
-        elif ball.rect.x <= ball.p1.x and ball.rect.colliderect(ball.p1):
+            if ball.rect.y + config.BALL_RADIUS >= ball.p2.y and ball.rect.y + config.BALL_RADIUS <= ball.p2.y + (ball.p2.height//3):
+                ball.y_vel = config.BALL_Y_VEL * -1
+                ball.x_vel = config.BALL_X_SLANT_VEL
+            elif ball.rect.y + config.BALL_RADIUS > ball.p2.y + (ball.p2.height//3) and  ball.rect.y + config.BALL_RADIUS < ball.p2.y + (2*(ball.p2.height//3)):
+                ball.y_vel = 0
+                ball.x_vel = config.BALL_X_STRAIGHT_VEL
+            elif ball.rect.y + config.BALL_RADIUS >= ball.p2.y + (2*(ball.p2.height//3)) and  ball.rect.y + config.BALL_RADIUS <= ball.p2.y + ball.p2.height:
+                ball.y_vel = config.BALL_Y_VEL
+                ball.x_vel = config.BALL_X_SLANT_VEL
+
+            if ball.moveright == False:
+                ball.x_vel *= -1
+
+        elif ball.rect.x <= ball.p1.x + ball.p1.width and ball.rect.colliderect(ball.p1):
             ball.moveright = True
+            if ball.rect.y + config.BALL_RADIUS >= ball.p1.y and ball.rect.y + config.BALL_RADIUS <= ball.p1.y + (ball.p1.height//3):
+                ball.y_vel = config.BALL_Y_VEL * -1
+                ball.x_vel = config.BALL_X_SLANT_VEL
+            elif ball.rect.y + config.BALL_RADIUS > ball.p1.y + (ball.p1.height//3) and  ball.rect.y + config.BALL_RADIUS < ball.p1.y + (2*(ball.p1.height//3)):
+                ball.y_vel = 0
+                ball.x_vel = config.BALL_X_STRAIGHT_VEL
+            elif ball.rect.y + config.BALL_RADIUS >= ball.p1.y + (2*(ball.p1.height//3)) and  ball.rect.y + config.BALL_RADIUS <= ball.p1.y + ball.p1.height:
+                ball.y_vel = config.BALL_Y_VEL
+                ball.x_vel = config.BALL_X_SLANT_VEL
+
+            if ball.moveright == False:
+                ball.x_vel *= -1
+            
+
         if ball.rect.x + ball.rect.width >= config.WIDTH:
             pygame.event.post(pygame.event.Event(P1_SCORE))
         elif ball.rect.x <= 0:
             pygame.event.post(pygame.event.Event(P2_SCORE))
 
-        #print(firsttime)
-        #"""
         if ball.firsttime:
             randnum = randint(0,1)
             if randnum == 1:
@@ -42,12 +70,12 @@ class Ball:
             ball.moveright = randbool
 
             ball.firsttime = False
-        #"""
-        
-        if ball.moveright:
-            ball.rect.x += config.BALL_VEL
-        if ball.moveright == False:
-            ball.rect.x -= config.BALL_VEL
+
+        if ball.rect.y + ball.rect.height >= config.WIDTH or ball.rect.y <= 0:
+            ball.y_vel *= -1
+
+        ball.rect.x += ball.x_vel
+        ball.rect.y += ball.y_vel
     
     def reset(ball):
         ball.rect.x = config.WIDTH/2 - config.BALL_RADIUS
@@ -57,6 +85,8 @@ class Ball:
         ball.p2.x = config.WIDTH - config.PLAYER_MARGIN
         ball.p2.y = config.HEIGHT/2 - config.PLAYER_HEIGHT/2
         ball.firsttime = True
+        ball.x_vel = config.BALL_X_STRAIGHT_VEL
+        ball.y_vel = 0
 
 def draw_screen(p1,p2,ball,p1_score,p2_score):
     WIN.fill(config.COLOR)
@@ -72,6 +102,19 @@ def draw_screen(p1,p2,ball,p1_score,p2_score):
 
     pygame.display.update()
 
+def draw_winner(win_text, counter):
+    win_text_render = WINNER_FONT.render(win_text, 1, config.WINNER_FONT_COLOR)
+    WIN.blit(win_text_render, (config.WIDTH/2 - (win_text_render.get_width()/2), config.HEIGHT/2 - (win_text_render.get_height()/2)))
+    
+    if counter == 0:
+        counter = time()
+        pygame.display.update()
+    elif time() >= counter + 5.0:
+        pygame.quit()
+        sys.exit()
+    return counter
+    
+
 def p1_movement(keys_pressed, p1):
     if keys_pressed[pygame.K_w] and p1.y - config.PLAYER_VEL >= 0:
         p1.y -= config.PLAYER_VEL
@@ -85,15 +128,19 @@ def p2_movement(keys_pressed, p2):
         p2.y += config.PLAYER_VEL
 
 def main():
+    pygame.display.set_caption("Ping Pong")
     p1 = pygame.Rect(config.PLAYER_MARGIN, config.HEIGHT/2 - config.PLAYER_HEIGHT/2, config.PLAYER_WIDTH, config.PLAYER_HEIGHT)
     p2 = pygame.Rect(config.WIDTH - config.PLAYER_MARGIN, config.HEIGHT/2 - config.PLAYER_HEIGHT/2, config.PLAYER_WIDTH, config.PLAYER_HEIGHT)
     ball = Ball(p1,p2,True,True)
-
+    
     clock = pygame.time.Clock()
     run = True
 
     p1_score = 0
     p2_score = 0
+    win_text = ""
+    counter = 0
+    isMoving = True
 
     while run:
         clock.tick(config.FPS)
@@ -106,18 +153,26 @@ def main():
             if event.type == P2_SCORE:
                 p2_score += 1
                 ball.reset()
+
+        if isMoving:
+            keys_pressed = pygame.key.get_pressed()
+            p1_movement(keys_pressed, p1)
+            p2_movement(keys_pressed, p2)
+            ball.movement()
+            draw_screen(p1,p2,ball, p1_score, p2_score)
         
-        keys_pressed = pygame.key.get_pressed()
-        p1_movement(keys_pressed, p1)
-        p2_movement(keys_pressed, p2)
-        ball.movement()
-        draw_screen(p1,p2,ball, p1_score, p2_score)
+        if p1_score >= 7:
+            win_text = "P1 Wins!"
+            counter = draw_winner(win_text,counter)
+            isMoving = False
+        if p2_score >= 7:
+            win_text = "P2 Wins!"
+            counter = draw_winner(win_text,counter)
+            isMoving = False
 
 
     pygame.quit()
     sys.exit()
-
-
 
 if __name__ == "__main__":
     main()
