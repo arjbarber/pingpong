@@ -104,15 +104,15 @@ def draw_screen(p1,p2,ball,p1_score,p2_score):
 
 def draw_winner(win_text, counter):
     win_text_render = WINNER_FONT.render(win_text, 1, config.WINNER_FONT_COLOR)
-    WIN.blit(win_text_render, (config.WIDTH/2 - win_text_render.get_width()/2, config.HEIGHT/2 - win_text_render.get_height()/2))
+    WIN.blit(win_text_render, (config.WIDTH/2 - (win_text_render.get_width()/2), config.HEIGHT/2 - (win_text_render.get_height()/2)))
     
     if counter == 0:
         counter = time()
-    elif time >= counter + 5.0:
+        pygame.display.update()
+    elif time() >= counter + 5.0:
         pygame.quit()
         sys.exit()
-    else:
-        return counter
+    return counter
     
 
 def p1_movement(keys_pressed, p1):
@@ -153,6 +153,13 @@ def main():
             if event.type == P2_SCORE:
                 p2_score += 1
                 ball.reset()
+
+        if isMoving:
+            keys_pressed = pygame.key.get_pressed()
+            p1_movement(keys_pressed, p1)
+            p2_movement(keys_pressed, p2)
+            ball.movement()
+            draw_screen(p1,p2,ball, p1_score, p2_score)
         
         if p1_score >= 7:
             win_text = "P1 Wins!"
@@ -163,18 +170,9 @@ def main():
             counter = draw_winner(win_text,counter)
             isMoving = False
 
-        if isMoving:
-            keys_pressed = pygame.key.get_pressed()
-            p1_movement(keys_pressed, p1)
-            p2_movement(keys_pressed, p2)
-            ball.movement()
-        draw_screen(p1,p2,ball, p1_score, p2_score)
-
 
     pygame.quit()
     sys.exit()
-
-
 
 if __name__ == "__main__":
     main()

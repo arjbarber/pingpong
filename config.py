@@ -29,5 +29,5 @@ SCORE_FONT_COLOR = colors.WHITE
 
 # Winner Font Settings
 WINNER_FONT_NAME = 'timesnewroman'
-WINNER_FONT_SIZE = 60
+WINNER_FONT_SIZE = 100
 WINNER_FONT_COLOR = colors.WHITE
