@@ -149,8 +149,8 @@ def p1_movement(p1, ball):
             p1.y += config.PLAYER_VEL
 
 def p2_movement(average_y, p2):
-    handstate = (average_y * config.HEIGHT) // 2
-    if handstate > 0 and handstate + p2.height <= config.HEIGHT:
+    handstate = (average_y / 10100) * config.HEIGHT * 20
+    if handstate > 0 and handstate <= config.HEIGHT:
         p2.y = handstate
     else:
         if handstate <= 0:
@@ -194,8 +194,8 @@ def main():
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         results = hands.process(frame_rgb)       
         
-        print(count)
-        print("y: ", average_y)
+        count = 0
+        average_y = 0
 
         if results.multi_hand_landmarks:
             for hand_landmarks in results.multi_hand_landmarks:
@@ -207,6 +207,7 @@ def main():
         
         cv2.imshow("Webcam",frame)
         
+
         if count > 0:
             average_y =  average_y / count
 
