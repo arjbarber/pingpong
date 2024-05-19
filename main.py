@@ -3,11 +3,17 @@ import sys
 import config
 import os
 import colors
+import cv2
+import mediapipe as mp
 from button import Button
 from random import randint
 from time import time
 pygame.init()
 
+mp_hands = mp.solutions.hands
+hands = mp_hands.Hands()
+
+cap = cv2.VideoCapture(0)
 
 def get_font(size): # Returns Press-Start-2P in the desired size
     return pygame.font.Font(os.path.join('Assets','font.ttf'), size)
@@ -134,17 +140,21 @@ def draw_winner(win_text, counter):
     return counter
     
 
-def p1_movement(keys_pressed, p1):
-    if keys_pressed[pygame.K_w] and p1.y - config.PLAYER_VEL >= 0:
-        p1.y -= config.PLAYER_VEL
-    if keys_pressed[pygame.K_s] and p1.y + p1.height + config.PLAYER_VEL <= config.HEIGHT:
-        p1.y += config.PLAYER_VEL
+def p1_movement(p1, ball):
+    if randint(1, 4) == 1:
+        if ball.rect.y + config.BALL_RADIUS < p1.y:
+            p1.y -= config.PLAYER_VEL
+        elif ball.rect.y + config.BALL_RADIUS > p1.y + p1.height:
+            p1.y += config.PLAYER_VEL
 
-def p2_movement(keys_pressed, p2):
-    if keys_pressed[pygame.K_UP] and p2.y - config.PLAYER_VEL >= 0:
-        p2.y -= config.PLAYER_VEL
-    if keys_pressed[pygame.K_DOWN] and p2.y + p2.height + config.PLAYER_VEL <= config.HEIGHT:
-        p2.y += config.PLAYER_VEL
+def p2_movement(average_y, p2):
+    if int(average_y * config.HEIGHT) > 0 and int(average_y * config.HEIGHT) + p2.height <= config.HEIGHT:
+        p2.y = int(average_y * config.HEIGHT)
+    else:
+        if int(average_y * config.HEIGHT) <= 0:
+            p2.y = 0
+        else:
+            p2.y = config.HEIGHT - p2.height
 
 def main():
     pygame.display.set_caption("Ping Pong")
@@ -154,6 +164,10 @@ def main():
     
     clock = pygame.time.Clock()
     run = True
+
+    average_y = 0
+    count = 0
+
 
     p1_score = 0
     p2_score = 0
@@ -173,10 +187,23 @@ def main():
                 p2_score += 1
                 ball.reset()
 
+        ret, frame = cap.read()
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        results = hands.process(frame_rgb)
+        if results.multi_hand_landmarks:
+            for hand_landmarks in results.multi_hand_landmarks:
+                for landmark in hand_landmarks.landmark:
+                    x, y = int(landmark.x * frame.shape[1]), int(landmark.y * frame.shape[0])
+                    cv2.circle(frame, (x, y), 5, (0, 255, 0), -1)
+                    average_y += y
+                    count += 1
+        if count > 0:
+            average_y =  average_y / count
+
         if isMoving:
             keys_pressed = pygame.key.get_pressed()
-            p1_movement(keys_pressed, p1)
-            p2_movement(keys_pressed, p2)
+            p1_movement(p1, ball)
+            p2_movement(average_y, p2)
             ball.movement()
             draw_screen(p1,p2,ball, p1_score, p2_score)
         
@@ -190,6 +217,8 @@ def main():
             isMoving = False
 
 
+    cap.release()
+    cv2.destroyAllWindows()
     pygame.quit()
     sys.exit()
 
