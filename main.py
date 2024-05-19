@@ -11,6 +11,7 @@ from time import time
 pygame.init()
 
 mp_hands = mp.solutions.hands
+mp_drawing = mp.solutions.drawing_utils
 hands = mp_hands.Hands()
 
 cap = cv2.VideoCapture(0)
@@ -188,8 +189,10 @@ def main():
                 ball.reset()
 
         ret, frame = cap.read()
+        
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        results = hands.process(frame_rgb)
+        results = hands.process(frame_rgb)       
+        
         if results.multi_hand_landmarks:
             for hand_landmarks in results.multi_hand_landmarks:
                 for landmark in hand_landmarks.landmark:
@@ -197,6 +200,9 @@ def main():
                     cv2.circle(frame, (x, y), 5, (0, 255, 0), -1)
                     average_y += y
                     count += 1
+        
+        cv2.imshow("Webcam",frame)
+        
         if count > 0:
             average_y =  average_y / count
 
