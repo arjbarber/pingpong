@@ -41,3 +41,7 @@ BUTTON_FONT_HOVER_COLOR = colors.GREEN
 # Menu Font Settings
 MENU_FONT_SIZE = 40
 MENU_FONT_COLOR = colors.YELLOW
+
+# Landmark Settings
+LANDMARK_COLOR = colors.BGR_RED
+LANDMARK_RADIUS = 5

@@ -41,7 +41,7 @@ P1_SCORE = pygame.USEREVENT + 1
 P2_SCORE = pygame.USEREVENT + 2
 
 class Ball:
-    def __init__(self, p1, p2, moveright, firstime, angle=0,y_vel=0,x_vel=config.BALL_X_STRAIGHT_VEL):
+    def __init__(self, p1: pygame.Rect, p2: pygame.Rect, moveright: bool, firstime: bool, angle=0,y_vel=0,x_vel=config.BALL_X_STRAIGHT_VEL):
         self.p1 = p1
         self.p2 = p2
         self.rect = pygame.Rect(config.WIDTH/2 - config.BALL_RADIUS,config.HEIGHT/2 - config.BALL_RADIUS, config.BALL_RADIUS*2, config.BALL_RADIUS*2)
@@ -149,10 +149,11 @@ def p1_movement(p1, ball):
             p1.y += config.PLAYER_VEL
 
 def p2_movement(average_y, p2):
-    if int(average_y * config.HEIGHT) > 0 and int(average_y * config.HEIGHT) + p2.height <= config.HEIGHT:
-        p2.y = int(average_y * config.HEIGHT)
+    handstate = (average_y * config.HEIGHT) // 2
+    if handstate > 0 and handstate + p2.height <= config.HEIGHT:
+        p2.y = handstate
     else:
-        if int(average_y * config.HEIGHT) <= 0:
+        if handstate <= 0:
             p2.y = 0
         else:
             p2.y = config.HEIGHT - p2.height
@@ -193,11 +194,14 @@ def main():
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         results = hands.process(frame_rgb)       
         
+        print(count)
+        print("y: ", average_y)
+
         if results.multi_hand_landmarks:
             for hand_landmarks in results.multi_hand_landmarks:
                 for landmark in hand_landmarks.landmark:
                     x, y = int(landmark.x * frame.shape[1]), int(landmark.y * frame.shape[0])
-                    cv2.circle(frame, (x, y), 5, (0, 255, 0), -1)
+                    cv2.circle(frame, (x, y), config.LANDMARK_RADIUS, config.LANDMARK_COLOR, -1)
                     average_y += y
                     count += 1
         
@@ -207,7 +211,6 @@ def main():
             average_y =  average_y / count
 
         if isMoving:
-            keys_pressed = pygame.key.get_pressed()
             p1_movement(p1, ball)
             p2_movement(average_y, p2)
             ball.movement()
@@ -217,10 +220,12 @@ def main():
             win_text = "P1 Wins!"
             counter = draw_winner(win_text,counter)
             isMoving = False
+
         if p2_score >= 7:
             win_text = "P2 Wins!"
             counter = draw_winner(win_text,counter)
             isMoving = False
+        
 
 
     cap.release()
