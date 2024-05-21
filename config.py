@@ -12,6 +12,7 @@ PLAYER_HEIGHT = 75
 PLAYER_MARGIN = 20
 PLAYER_VEL = 10
 PLAYER_COLOR = colors.RED
+PLAYER_COMPUTER_DIFFICULTY = 4 # The Higher the number, the easier the computer is
 
 # Ball Settings
 BALL_RADIUS = 5

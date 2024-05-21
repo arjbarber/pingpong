@@ -142,7 +142,7 @@ def draw_winner(win_text, counter):
     
 
 def p1_movement(p1, ball):
-    if randint(1, 4) == 1:
+    if randint(0, config.PLAYER_COMPUTER_DIFFICULTY) == 0:
         if ball.rect.y + config.BALL_RADIUS < p1.y:
             p1.y -= config.PLAYER_VEL
         elif ball.rect.y + config.BALL_RADIUS > p1.y + p1.height:
