@@ -10,6 +10,8 @@ from random import randint
 from time import time
 pygame.init()
 
+# Initiallize MediaPipe Module
+
 mp_hands = mp.solutions.hands
 mp_drawing = mp.solutions.drawing_utils
 hands = mp_hands.Hands()
