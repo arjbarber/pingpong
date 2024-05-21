@@ -14,5 +14,5 @@ Feel free to play around with the settings in the config.py file to change the a
 This project was created by Andrew Barber for a Hackathon at CHS on 5/20/24. Any other contributors listed on this page are simply me using another computer.
 
 ## Credits
-Used the mediapipe library by **Google**
-Used a modified version of the button class by **baraltech**
+- Used the mediapipe library by **Google**
+- Used a modified version of the button class by **baraltech**
