@@ -41,7 +41,7 @@ P1_SCORE = pygame.USEREVENT + 1
 P2_SCORE = pygame.USEREVENT + 2
 
 class Ball:
-    def __init__(self, p1: pygame.Rect, p2: pygame.Rect, moveright: bool, firstime: bool, angle=0,y_vel=0,x_vel=config.BALL_X_STRAIGHT_VEL):
+    def __init__(self, p1: pygame.Rect, p2: pygame.Rect, moveright: bool, firstime: bool, angle=0,y_vel=config.BALL_VELS['straight']['y'],x_vel=config.BALL_VELS['straight']['x']):
         self.p1 = p1
         self.p2 = p2
         self.rect = pygame.Rect(config.WIDTH/2 - config.BALL_RADIUS,config.HEIGHT/2 - config.BALL_RADIUS, config.BALL_RADIUS*2, config.BALL_RADIUS*2)
@@ -54,30 +54,42 @@ class Ball:
     def movement(ball):
         if ball.rect.x + ball.rect.width >= ball.p2.x and ball.rect.colliderect(ball.p2):
             ball.moveright = False
-            if ball.rect.y + config.BALL_RADIUS >= ball.p2.y and ball.rect.y + config.BALL_RADIUS <= ball.p2.y + (ball.p2.height//3):
-                ball.y_vel = config.BALL_Y_VEL * -1
-                ball.x_vel = config.BALL_X_SLANT_VEL
-            elif ball.rect.y + config.BALL_RADIUS > ball.p2.y + (ball.p2.height//3) and  ball.rect.y + config.BALL_RADIUS < ball.p2.y + (2*(ball.p2.height//3)):
-                ball.y_vel = 0
-                ball.x_vel = config.BALL_X_STRAIGHT_VEL
-            elif ball.rect.y + config.BALL_RADIUS >= ball.p2.y + (2*(ball.p2.height//3)) and  ball.rect.y + config.BALL_RADIUS <= ball.p2.y + ball.p2.height:
-                ball.y_vel = config.BALL_Y_VEL
-                ball.x_vel = config.BALL_X_SLANT_VEL
+            if ball.rect.y + config.BALL_RADIUS >= ball.p2.y and ball.rect.y + config.BALL_RADIUS <= ball.p2.y + (ball.p2.height//5):
+                ball.y_vel = config.BALL_VELS['slant_max']['y'] * -1
+                ball.x_vel = config.BALL_VELS['slant_max']['x']
+            elif ball.rect.y + config.BALL_RADIUS > ball.p2.y + (ball.p2.height//5) and  ball.rect.y + config.BALL_RADIUS < ball.p2.y + (2*(ball.p2.height//5)):
+                ball.y_vel = config.BALL_VELS['slant_min']['y'] * -1
+                ball.x_vel = config.BALL_VELS['slant_min']['x']
+            elif ball.rect.y + config.BALL_RADIUS > ball.p2.y + (2*(ball.p2.height//5)) and  ball.rect.y + config.BALL_RADIUS < ball.p2.y + (3*(ball.p2.height//5)):
+                ball.y_vel = config.BALL_VELS['straight']['y']
+                ball.x_vel = config.BALL_VELS['straight']['x']
+            elif ball.rect.y + config.BALL_RADIUS > ball.p2.y + (3*(ball.p2.height//5)) and  ball.rect.y + config.BALL_RADIUS < ball.p2.y + (4*(ball.p2.height//5)):
+                ball.y_vel = config.BALL_VELS['slant_min']['y']
+                ball.x_vel = config.BALL_VELS['slant_min']['x']
+            elif ball.rect.y + config.BALL_RADIUS >= ball.p2.y + (4*(ball.p2.height//5)) and  ball.rect.y + config.BALL_RADIUS <= ball.p2.y + ball.p2.height:
+                ball.y_vel = config.BALL_VELS['slant_max']['y']
+                ball.x_vel = config.BALL_VELS['slant_max']['x']
 
             if ball.moveright == False:
                 ball.x_vel *= -1
 
         elif ball.rect.x <= ball.p1.x + ball.p1.width and ball.rect.colliderect(ball.p1):
             ball.moveright = True
-            if ball.rect.y + config.BALL_RADIUS >= ball.p1.y and ball.rect.y + config.BALL_RADIUS <= ball.p1.y + (ball.p1.height//3):
-                ball.y_vel = config.BALL_Y_VEL * -1
-                ball.x_vel = config.BALL_X_SLANT_VEL
-            elif ball.rect.y + config.BALL_RADIUS > ball.p1.y + (ball.p1.height//3) and  ball.rect.y + config.BALL_RADIUS < ball.p1.y + (2*(ball.p1.height//3)):
-                ball.y_vel = 0
-                ball.x_vel = config.BALL_X_STRAIGHT_VEL
-            elif ball.rect.y + config.BALL_RADIUS >= ball.p1.y + (2*(ball.p1.height//3)) and  ball.rect.y + config.BALL_RADIUS <= ball.p1.y + ball.p1.height:
-                ball.y_vel = config.BALL_Y_VEL
-                ball.x_vel = config.BALL_X_SLANT_VEL
+            if ball.rect.y + config.BALL_RADIUS >= ball.p1.y and ball.rect.y + config.BALL_RADIUS <= ball.p1.y + (ball.p1.height//5):
+                ball.y_vel = config.BALL_VELS['slant_max']['y'] * -1
+                ball.x_vel = config.BALL_VELS['slant_max']['x']
+            elif ball.rect.y + config.BALL_RADIUS > ball.p1.y + (ball.p1.height//5) and  ball.rect.y + config.BALL_RADIUS < ball.p1.y + (2*(ball.p1.height//5)):
+                ball.y_vel = config.BALL_VELS['slant_min']['y'] * -1
+                ball.x_vel = config.BALL_VELS['slant_min']['x']
+            elif ball.rect.y + config.BALL_RADIUS > ball.p1.y + (2*(ball.p1.height//5)) and  ball.rect.y + config.BALL_RADIUS < ball.p1.y + (3*(ball.p1.height//5)):
+                ball.y_vel = config.BALL_VELS['straight']['y']
+                ball.x_vel = config.BALL_VELS['straight']['x']
+            elif ball.rect.y + config.BALL_RADIUS > ball.p1.y + (3*(ball.p1.height//5)) and  ball.rect.y + config.BALL_RADIUS < ball.p1.y + (4*(ball.p1.height//5)):
+                ball.y_vel = config.BALL_VELS['slant_min']['y']
+                ball.x_vel = config.BALL_VELS['slant_min']['x']
+            elif ball.rect.y + config.BALL_RADIUS >= ball.p1.y + (4*(ball.p1.height//5)) and  ball.rect.y + config.BALL_RADIUS <= ball.p1.y + ball.p1.height:
+                ball.y_vel = config.BALL_VELS['slant_max']['y']
+                ball.x_vel = config.BALL_VELS['slant_max']['x']
 
             if ball.moveright == False:
                 ball.x_vel *= -1
@@ -112,8 +124,8 @@ class Ball:
         ball.p2.x = config.WIDTH - config.PLAYER_MARGIN
         ball.p2.y = config.HEIGHT/2 - config.PLAYER_HEIGHT/2
         ball.firsttime = True
-        ball.x_vel = config.BALL_X_STRAIGHT_VEL
-        ball.y_vel = 0
+        ball.x_vel = config.BALL_VELS['straight']['x']
+        ball.y_vel = config.BALL_VELS['straight']['y']
 
 def draw_screen(p1,p2,ball,p1_score,p2_score):
     WIN.fill(config.COLOR)
@@ -247,7 +259,7 @@ def menu():
     )
     
     MENU_TEXT = get_font(config.MENU_FONT_SIZE).render("Ping Pong", True, config.MENU_FONT_COLOR)
-    MENU_RECT = MENU_TEXT.get_rect(center=(config.WIDTH//2,config.HEIGHT//2 - 200))
+    MENU_RECT = MENU_TEXT.get_rect(center=(config.WIDTH//2,config.HEIGHT//2 - 250))
     
     quitButton = Button(quit_button_surface, (config.WIDTH//2), (config.HEIGHT//2) + 150, "Quit",WIN)
     playButton = Button(play_button_surface, (config.WIDTH//2), (config.HEIGHT//2) - 50, "Play",WIN)
