@@ -1,5 +1,11 @@
 # Ping Pong
 
+## Table of Contents
+
+- [Instructions for Use](#instructions-for-use)
+- [Info](#info)
+- [Credits](#credits)
+
 ## Instructions for use
 1. Install a python interpreter (can be installed from the microsoft store)
 2. Install the Pygame module by using `pip install pygame` in powershell
