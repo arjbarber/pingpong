@@ -3,11 +3,20 @@ import sys
 import config
 import os
 import colors
+import cv2
+import mediapipe as mp
 from button import Button
 from random import randint
 from time import time
 pygame.init()
 
+# Initiallize MediaPipe Module
+
+mp_hands = mp.solutions.hands
+mp_drawing = mp.solutions.drawing_utils
+hands = mp_hands.Hands()
+
+cap = cv2.VideoCapture(0)
 
 def get_font(size): # Returns Press-Start-2P in the desired size
     return pygame.font.Font(os.path.join('Assets','font.ttf'), size)
@@ -34,7 +43,7 @@ P1_SCORE = pygame.USEREVENT + 1
 P2_SCORE = pygame.USEREVENT + 2
 
 class Ball:
-    def __init__(self, p1, p2, moveright, firstime, angle=0,y_vel=0,x_vel=config.BALL_X_STRAIGHT_VEL):
+    def __init__(self, p1: pygame.Rect, p2: pygame.Rect, moveright: bool, firstime: bool, angle=0,y_vel=config.BALL_VELS['straight']['y'],x_vel=config.BALL_VELS['straight']['x']):
         self.p1 = p1
         self.p2 = p2
         self.rect = pygame.Rect(config.WIDTH/2 - config.BALL_RADIUS,config.HEIGHT/2 - config.BALL_RADIUS, config.BALL_RADIUS*2, config.BALL_RADIUS*2)
@@ -47,30 +56,42 @@ class Ball:
     def movement(ball):
         if ball.rect.x + ball.rect.width >= ball.p2.x and ball.rect.colliderect(ball.p2):
             ball.moveright = False
-            if ball.rect.y + config.BALL_RADIUS >= ball.p2.y and ball.rect.y + config.BALL_RADIUS <= ball.p2.y + (ball.p2.height//3):
-                ball.y_vel = config.BALL_Y_VEL * -1
-                ball.x_vel = config.BALL_X_SLANT_VEL
-            elif ball.rect.y + config.BALL_RADIUS > ball.p2.y + (ball.p2.height//3) and  ball.rect.y + config.BALL_RADIUS < ball.p2.y + (2*(ball.p2.height//3)):
-                ball.y_vel = 0
-                ball.x_vel = config.BALL_X_STRAIGHT_VEL
-            elif ball.rect.y + config.BALL_RADIUS >= ball.p2.y + (2*(ball.p2.height//3)) and  ball.rect.y + config.BALL_RADIUS <= ball.p2.y + ball.p2.height:
-                ball.y_vel = config.BALL_Y_VEL
-                ball.x_vel = config.BALL_X_SLANT_VEL
+            if ball.rect.y + config.BALL_RADIUS >= ball.p2.y and ball.rect.y + config.BALL_RADIUS <= ball.p2.y + (ball.p2.height//5):
+                ball.y_vel = config.BALL_VELS['slant_max']['y'] * -1
+                ball.x_vel = config.BALL_VELS['slant_max']['x']
+            elif ball.rect.y + config.BALL_RADIUS > ball.p2.y + (ball.p2.height//5) and  ball.rect.y + config.BALL_RADIUS < ball.p2.y + (2*(ball.p2.height//5)):
+                ball.y_vel = config.BALL_VELS['slant_min']['y'] * -1
+                ball.x_vel = config.BALL_VELS['slant_min']['x']
+            elif ball.rect.y + config.BALL_RADIUS > ball.p2.y + (2*(ball.p2.height//5)) and  ball.rect.y + config.BALL_RADIUS < ball.p2.y + (3*(ball.p2.height//5)):
+                ball.y_vel = config.BALL_VELS['straight']['y']
+                ball.x_vel = config.BALL_VELS['straight']['x']
+            elif ball.rect.y + config.BALL_RADIUS > ball.p2.y + (3*(ball.p2.height//5)) and  ball.rect.y + config.BALL_RADIUS < ball.p2.y + (4*(ball.p2.height//5)):
+                ball.y_vel = config.BALL_VELS['slant_min']['y']
+                ball.x_vel = config.BALL_VELS['slant_min']['x']
+            elif ball.rect.y + config.BALL_RADIUS >= ball.p2.y + (4*(ball.p2.height//5)) and  ball.rect.y + config.BALL_RADIUS <= ball.p2.y + ball.p2.height:
+                ball.y_vel = config.BALL_VELS['slant_max']['y']
+                ball.x_vel = config.BALL_VELS['slant_max']['x']
 
             if ball.moveright == False:
                 ball.x_vel *= -1
 
         elif ball.rect.x <= ball.p1.x + ball.p1.width and ball.rect.colliderect(ball.p1):
             ball.moveright = True
-            if ball.rect.y + config.BALL_RADIUS >= ball.p1.y and ball.rect.y + config.BALL_RADIUS <= ball.p1.y + (ball.p1.height//3):
-                ball.y_vel = config.BALL_Y_VEL * -1
-                ball.x_vel = config.BALL_X_SLANT_VEL
-            elif ball.rect.y + config.BALL_RADIUS > ball.p1.y + (ball.p1.height//3) and  ball.rect.y + config.BALL_RADIUS < ball.p1.y + (2*(ball.p1.height//3)):
-                ball.y_vel = 0
-                ball.x_vel = config.BALL_X_STRAIGHT_VEL
-            elif ball.rect.y + config.BALL_RADIUS >= ball.p1.y + (2*(ball.p1.height//3)) and  ball.rect.y + config.BALL_RADIUS <= ball.p1.y + ball.p1.height:
-                ball.y_vel = config.BALL_Y_VEL
-                ball.x_vel = config.BALL_X_SLANT_VEL
+            if ball.rect.y + config.BALL_RADIUS >= ball.p1.y and ball.rect.y + config.BALL_RADIUS <= ball.p1.y + (ball.p1.height//5):
+                ball.y_vel = config.BALL_VELS['slant_max']['y'] * -1
+                ball.x_vel = config.BALL_VELS['slant_max']['x']
+            elif ball.rect.y + config.BALL_RADIUS > ball.p1.y + (ball.p1.height//5) and  ball.rect.y + config.BALL_RADIUS < ball.p1.y + (2*(ball.p1.height//5)):
+                ball.y_vel = config.BALL_VELS['slant_min']['y'] * -1
+                ball.x_vel = config.BALL_VELS['slant_min']['x']
+            elif ball.rect.y + config.BALL_RADIUS > ball.p1.y + (2*(ball.p1.height//5)) and  ball.rect.y + config.BALL_RADIUS < ball.p1.y + (3*(ball.p1.height//5)):
+                ball.y_vel = config.BALL_VELS['straight']['y']
+                ball.x_vel = config.BALL_VELS['straight']['x']
+            elif ball.rect.y + config.BALL_RADIUS > ball.p1.y + (3*(ball.p1.height//5)) and  ball.rect.y + config.BALL_RADIUS < ball.p1.y + (4*(ball.p1.height//5)):
+                ball.y_vel = config.BALL_VELS['slant_min']['y']
+                ball.x_vel = config.BALL_VELS['slant_min']['x']
+            elif ball.rect.y + config.BALL_RADIUS >= ball.p1.y + (4*(ball.p1.height//5)) and  ball.rect.y + config.BALL_RADIUS <= ball.p1.y + ball.p1.height:
+                ball.y_vel = config.BALL_VELS['slant_max']['y']
+                ball.x_vel = config.BALL_VELS['slant_max']['x']
 
             if ball.moveright == False:
                 ball.x_vel *= -1
@@ -105,8 +126,8 @@ class Ball:
         ball.p2.x = config.WIDTH - config.PLAYER_MARGIN
         ball.p2.y = config.HEIGHT/2 - config.PLAYER_HEIGHT/2
         ball.firsttime = True
-        ball.x_vel = config.BALL_X_STRAIGHT_VEL
-        ball.y_vel = 0
+        ball.x_vel = config.BALL_VELS['straight']['x']
+        ball.y_vel = config.BALL_VELS['straight']['y']
 
 def draw_screen(p1,p2,ball,p1_score,p2_score):
     WIN.fill(config.COLOR)
@@ -134,17 +155,22 @@ def draw_winner(win_text, counter):
     return counter
     
 
-def p1_movement(keys_pressed, p1):
-    if keys_pressed[pygame.K_w] and p1.y - config.PLAYER_VEL >= 0:
-        p1.y -= config.PLAYER_VEL
-    if keys_pressed[pygame.K_s] and p1.y + p1.height + config.PLAYER_VEL <= config.HEIGHT:
-        p1.y += config.PLAYER_VEL
+def p1_movement(p1, ball):
+    if randint(0, config.PLAYER_COMPUTER_DIFFICULTY) == 0:
+        if ball.rect.y + config.BALL_RADIUS < p1.y:
+            p1.y -= config.PLAYER_VEL
+        elif ball.rect.y + config.BALL_RADIUS > p1.y + p1.height:
+            p1.y += config.PLAYER_VEL
 
-def p2_movement(keys_pressed, p2):
-    if keys_pressed[pygame.K_UP] and p2.y - config.PLAYER_VEL >= 0:
-        p2.y -= config.PLAYER_VEL
-    if keys_pressed[pygame.K_DOWN] and p2.y + p2.height + config.PLAYER_VEL <= config.HEIGHT:
-        p2.y += config.PLAYER_VEL
+def p2_movement(average_y, p2):
+    handstate = (average_y / 10100) * config.HEIGHT * 20
+    if handstate > 0 and handstate <= config.HEIGHT:
+        p2.y = handstate
+    else:
+        if handstate <= 0:
+            p2.y = 0
+        else:
+            p2.y = config.HEIGHT - p2.height
 
 def main():
     pygame.display.set_caption("Ping Pong")
@@ -154,6 +180,10 @@ def main():
     
     clock = pygame.time.Clock()
     run = True
+
+    average_y = 0
+    count = 0
+
 
     p1_score = 0
     p2_score = 0
@@ -173,10 +203,31 @@ def main():
                 p2_score += 1
                 ball.reset()
 
+        ret, frame = cap.read()
+        
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        results = hands.process(frame_rgb)       
+        
+        count = 0
+        average_y = 0
+
+        if results.multi_hand_landmarks:
+            for hand_landmarks in results.multi_hand_landmarks:
+                for landmark in hand_landmarks.landmark:
+                    x, y = int(landmark.x * frame.shape[1]), int(landmark.y * frame.shape[0])
+                    cv2.circle(frame, (x, y), config.LANDMARK_RADIUS, config.LANDMARK_COLOR, -1)
+                    average_y += y
+                    count += 1
+        
+        cv2.imshow("Webcam",frame)
+        
+
+        if count > 0:
+            average_y =  average_y / count
+
         if isMoving:
-            keys_pressed = pygame.key.get_pressed()
-            p1_movement(keys_pressed, p1)
-            p2_movement(keys_pressed, p2)
+            p1_movement(p1, ball)
+            p2_movement(average_y, p2)
             ball.movement()
             draw_screen(p1,p2,ball, p1_score, p2_score)
         
@@ -184,12 +235,16 @@ def main():
             win_text = "P1 Wins!"
             counter = draw_winner(win_text,counter)
             isMoving = False
+
         if p2_score >= 7:
             win_text = "P2 Wins!"
             counter = draw_winner(win_text,counter)
             isMoving = False
+        
 
 
+    cap.release()
+    cv2.destroyAllWindows()
     pygame.quit()
     sys.exit()
 
@@ -206,7 +261,7 @@ def menu():
     )
     
     MENU_TEXT = get_font(config.MENU_FONT_SIZE).render("Ping Pong", True, config.MENU_FONT_COLOR)
-    MENU_RECT = MENU_TEXT.get_rect(center=(config.WIDTH//2,config.HEIGHT//2 - 200))
+    MENU_RECT = MENU_TEXT.get_rect(center=(config.WIDTH//2,config.HEIGHT//2 - 250))
     
     quitButton = Button(quit_button_surface, (config.WIDTH//2), (config.HEIGHT//2) + 150, "Quit",WIN)
     playButton = Button(play_button_surface, (config.WIDTH//2), (config.HEIGHT//2) - 50, "Play",WIN)
