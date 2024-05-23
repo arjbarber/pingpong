@@ -20,7 +20,7 @@ BALL_COLOR = colors.WHITE
 BALL_VELS = {
     'straight': {'x': 10, 'y': 0},
     'slant_max': {'x': 8, 'y': 6},
-    'slant_min': {'x': 6, 'y': 4},
+    'slant_min': {'x': 9, 'y': 4},
 }
 
 # Score Font Settings
