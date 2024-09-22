@@ -8,7 +8,10 @@ import mediapipe as mp
 from button import Button
 from random import randint
 from time import time
+
 pygame.init()
+
+
 
 # Initiallize MediaPipe Module
 
