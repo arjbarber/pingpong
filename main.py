@@ -24,9 +24,10 @@ cap = cv2.VideoCapture(0)
 def get_font(size): # Returns Press-Start-2P in the desired size
     return pygame.font.Font(os.path.join('Assets','font.ttf'), size)
 
-
+# Set Display Window
 WIN = pygame.display.set_mode((config.WIDTH,config.HEIGHT))
 
+# Font stuff
 if config.SCORE_FONT_NAME == 'Press-Start-2P':
     SCORE_FONT = get_font(config.SCORE_FONT_SIZE)
 else:
@@ -36,28 +37,30 @@ if config.WINNER_FONT_NAME == 'Press-Start-2P':
 else:
     WINNER_FONT = pygame.font.SysFont(config.WINNER_FONT_NAME, config.WINNER_FONT_SIZE)
 
+# Background
 BACKGROUND_IMAGE = pygame.image.load(
     os.path.join('Assets','Background.png')
 )
 BACKGROUND = pygame.transform.scale(BACKGROUND_IMAGE,(config.WIDTH,config.HEIGHT))
 
-
+# Events
 P1_SCORE = pygame.USEREVENT + 1
 P2_SCORE = pygame.USEREVENT + 2
 
+# Ball Class, controlls the movement of the ball.
 class Ball:
+    # Constructor
     def __init__(self, p1: pygame.Rect, p2: pygame.Rect, moveright: bool, firstime: bool, angle=0,y_vel=config.BALL_VELS['straight']['y'],x_vel=config.BALL_VELS['straight']['x']):
-        self.p1 = p1
-        self.p2 = p2
-        self.rect = pygame.Rect(config.WIDTH/2 - config.BALL_RADIUS,config.HEIGHT/2 - config.BALL_RADIUS, config.BALL_RADIUS*2, config.BALL_RADIUS*2)
-        self.moveright = moveright
-        self.firsttime = firstime
-        self.angle = angle
-        self.y_vel = y_vel
-        self.x_vel = x_vel
+        self.p1 = p1 # p1 paddle as a rect
+        self.p2 = p2 # p2 paddle as a rect
+        self.rect = pygame.Rect(config.WIDTH/2 - config.BALL_RADIUS,config.HEIGHT/2 - config.BALL_RADIUS, config.BALL_RADIUS*2, config.BALL_RADIUS*2) # rect to make it easier to manipulate
+        self.moveright = moveright # boolean value of which direction the ball is moving
+        self.firsttime = firstime # boolean value of if the ball is on its first movement from the center after a round ends
+        self.y_vel = y_vel # Y velocity of the ball
+        self.x_vel = x_vel # X velocity of the ball
 
-    def movement(ball):
-        if ball.rect.x + ball.rect.width >= ball.p2.x and ball.rect.colliderect(ball.p2):
+    def movement(ball): # controlls the movement of the ball, is called every frame
+        if ball.rect.x + ball.rect.width >= ball.p2.x and ball.rect.colliderect(ball.p2): # Determine which angle to move the ball at based on where on the paddle the ball hits for P2
             ball.moveright = False
             if ball.rect.y + config.BALL_RADIUS >= ball.p2.y and ball.rect.y + config.BALL_RADIUS <= ball.p2.y + (ball.p2.height//5):
                 ball.y_vel = config.BALL_VELS['slant_max']['y'] * -1
@@ -75,10 +78,10 @@ class Ball:
                 ball.y_vel = config.BALL_VELS['slant_max']['y']
                 ball.x_vel = config.BALL_VELS['slant_max']['x']
 
-            if ball.moveright == False:
+            if ball.moveright == False: # switch x directions once the ball hits the paddle
                 ball.x_vel *= -1
 
-        elif ball.rect.x <= ball.p1.x + ball.p1.width and ball.rect.colliderect(ball.p1):
+        elif ball.rect.x <= ball.p1.x + ball.p1.width and ball.rect.colliderect(ball.p1): # P1 of the same thing
             ball.moveright = True
             if ball.rect.y + config.BALL_RADIUS >= ball.p1.y and ball.rect.y + config.BALL_RADIUS <= ball.p1.y + (ball.p1.height//5):
                 ball.y_vel = config.BALL_VELS['slant_max']['y'] * -1
@@ -96,15 +99,17 @@ class Ball:
                 ball.y_vel = config.BALL_VELS['slant_max']['y']
                 ball.x_vel = config.BALL_VELS['slant_max']['x']
 
-            if ball.moveright == False:
+            if ball.moveright == False: # switch x directions once the ball hits the paddle
                 ball.x_vel *= -1
             
 
+        # If the ball goes of the screen in the x direction, give the respective player a point.
         if ball.rect.x + ball.rect.width >= config.WIDTH:
             pygame.event.post(pygame.event.Event(P1_SCORE))
         elif ball.rect.x <= 0:
             pygame.event.post(pygame.event.Event(P2_SCORE))
 
+        # If it is the first time in a round, make it go in a random direction.
         if ball.firsttime:
             randnum = randint(0,1)
             if randnum == 1:
@@ -115,12 +120,14 @@ class Ball:
 
             ball.firsttime = False
 
+        # If the ball touches the top or bottom of the window, make it bounce.
         if ball.rect.y + ball.rect.height >= config.WIDTH or ball.rect.y <= 0:
             ball.y_vel *= -1
 
         ball.rect.x += ball.x_vel
         ball.rect.y += ball.y_vel
     
+    # Resets the ball to the center of the screen
     def reset(ball):
         ball.rect.x = config.WIDTH/2 - config.BALL_RADIUS
         ball.rect.y = config.HEIGHT/2 - config.BALL_RADIUS
@@ -132,6 +139,7 @@ class Ball:
         ball.x_vel = config.BALL_VELS['straight']['x']
         ball.y_vel = config.BALL_VELS['straight']['y']
 
+# Updates the screen every frame
 def draw_screen(p1,p2,ball,p1_score,p2_score):
     WIN.fill(config.COLOR)
 
@@ -145,6 +153,7 @@ def draw_screen(p1,p2,ball,p1_score,p2_score):
     pygame.draw.circle(WIN, config.BALL_COLOR,(ball.rect.x + config.BALL_RADIUS,ball.rect.y + config.BALL_RADIUS),config.BALL_RADIUS,width=0)
 
     pygame.display.update()
+
 
 def draw_winner(win_text, counter):
     win_text_render = WINNER_FONT.render(win_text, 1, config.WINNER_FONT_COLOR)
